@@ -21,7 +21,9 @@ mod tests {
 
             if let Some(chat) = chat {
                 loop {
-                    chat.fetch_event().await;
+                    let event = chat.fetch_event().await;
+
+                    //println!("{:?}", event);
                 }
             }
         }

@@ -92,16 +92,17 @@ impl Chat {
 
     pub async fn fetch_event(&mut self) -> ChatEvent {
         let omegle_url = format!("{}.omegle.com", self.server.name);
+        let pair = ("id", self.client_id.clone());
 
         let response = self
             .server
             .client
-            .post(format!(
-                "https://{}/events?id={}",
-                omegle_url, self.client_id
-            ))
+            .post(format!("https://{}/events", omegle_url))
+            .form(&pair)
             .send()
             .await;
+
+        println!("{:?}", response);
 
         if let Ok(response) = response {
             if let Ok(body) = response.text().await {
@@ -115,6 +116,7 @@ impl Chat {
     }
 }
 
+#[derive(Debug)]
 pub enum ChatEvent {
     Message(String),
     Disconnected,
