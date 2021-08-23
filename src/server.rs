@@ -62,8 +62,7 @@ impl Chat {
         let response = self
             .server
             .client
-            .post(format!("https://{}/events", omegle_url))
-            .body(format!("id={}", self.client_id.clone()))
+            .post(format!("https://{}/events?id={}", omegle_url, self.client_id))
             .send()
             .await;
 
