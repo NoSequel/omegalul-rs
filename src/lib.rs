@@ -6,14 +6,11 @@ pub mod omegalul {}
 #[cfg(test)]
 mod tests {
 
-    use crate::server::{get_random_server, Server};
-    use reqwest::Client;
+    use crate::server::{ChatEvent, Server, get_random_server};
 
     #[tokio::test]
     async fn attempt_connect() {
-        let client = Client::new();
-
-        if let Some(server_name) = get_random_server(client).await {
+        if let Some(server_name) = get_random_server().await {
             println!("Connecting to {} server", server_name);
 
             let server = &mut Server::new(server_name.as_str());
@@ -23,7 +20,12 @@ mod tests {
                 loop {
                     let event = chat.fetch_event().await;
 
-                    //println!("{:?}", event);
+                    match event {
+                        ChatEvent::Message(message) => println!("{}", &message),
+                        ChatEvent::Disconnected => println!("The user has disconnected... mean."),
+                        ChatEvent::Typing => println!("The user is typing... how exciting!"),
+                        _ => ()
+                    }
                 }
             }
         }

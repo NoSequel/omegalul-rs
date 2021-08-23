@@ -4,8 +4,8 @@ use reqwest::Client;
 
 use rand::seq::SliceRandom;
 
-pub async fn get_random_server(client: Client) -> Option<String> {
-    let servers = get_servers(client).await;
+pub async fn get_random_server() -> Option<String> {
+    let servers = get_servers().await;
 
     if let Some(servers) = servers {
         match servers {
@@ -23,7 +23,8 @@ pub async fn get_random_server(client: Client) -> Option<String> {
     return None;
 }
 
-pub async fn get_servers(client: Client) -> Option<JsonValue> {
+pub async fn get_servers() -> Option<JsonValue> {
+    let client = Client::new();
     let request = client.get("https://omegle.com/status").send().await;
 
     if let Ok(request) = request {
