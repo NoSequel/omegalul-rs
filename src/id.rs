@@ -1,9 +1,9 @@
-use rand::{distributions::Alphanumeric, prelude::Distribution, Rng};
+use rand::{prelude::Distribution, Rng};
 
 pub fn generate_random_id() -> String {
     let rng = &mut rand::thread_rng();
     let result: String = rng
-        .sample_iter(Alphanumeric)
+        .sample_iter(Omeglenumeric)
         .take(8)
         .map(char::from)
         .collect();
