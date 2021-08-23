@@ -16,7 +16,7 @@ pub fn generate_random_id() -> String {
 pub struct Omeglenumeric;
 impl Distribution<u8> for Omeglenumeric {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> u8 {
-        const RANGE: u32 = 26 + 26 + 10;
+        const RANGE: u32 = 24 + 10;
         const GEN_ASCII_STR_CHARSET: &[u8] = b"ABCDEFGHJKLMNPQRSTUVWXYZ\
                 0123456789";
 

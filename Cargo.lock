@@ -475,7 +475,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "omegalul-rs"
+name = "omegalul"
 version = "0.1.0"
 dependencies = [
  "futures",

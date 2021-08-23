@@ -1,5 +1,39 @@
 use crate::id::*;
+use json::JsonValue;
 use reqwest::Client;
+
+use rand::seq::SliceRandom;
+
+pub async fn get_random_server(client: Client) -> Option<String> {
+    let servers = get_servers(client).await;
+
+    if let Some(servers) = servers {
+        match servers {
+            JsonValue::Array(array) => {
+                let random = array.choose(&mut rand::thread_rng());
+
+                if let Some(random) = random {
+                    return Some(random.as_str().unwrap().to_string());
+                }
+            }
+            _ => {}
+        }
+    }
+
+    return None;
+}
+
+pub async fn get_servers(client: Client) -> Option<JsonValue> {
+    let request = client.get("https://omegle.com/status").send().await;
+
+    if let Ok(request) = request {
+        return Some(
+            json::parse(request.text().await.unwrap().as_str()).unwrap()["servers"].clone(),
+        );
+    }
+
+    return None;
+}
 
 #[derive(Clone)]
 pub struct Server {
@@ -62,16 +96,19 @@ impl Chat {
         let response = self
             .server
             .client
-            .post(format!("https://{}/events?id={}", omegle_url, self.client_id))
+            .post(format!(
+                "https://{}/events?id={}",
+                omegle_url, self.client_id
+            ))
             .send()
             .await;
 
         if let Ok(response) = response {
-            println!("{:?}", response);
-
-            //if let Ok(json) = json::parse(response.text().await.unwrap().as_str()) {
-            //    println!("{}", json)
-            //}
+            if let Ok(body) = response.text().await {
+                if let Ok(json) = json::parse(body.as_str()) {
+                    println!("{}", json)
+                }
+            }
         }
 
         return ChatEvent::None;

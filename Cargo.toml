@@ -1,5 +1,5 @@
 [package]
-name = "omegalul-rs"
+name = "omegalul"
 version = "0.1.0"
 edition = "2018"
 
@@ -10,4 +10,5 @@ reqwest = "*"
 json = "0.12.4"
 rand = "0.8.4"
 futures = "*"
+
 tokio = { version = "1.10.0", features = ["full"] }
