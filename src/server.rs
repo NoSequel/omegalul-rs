@@ -57,7 +57,7 @@ impl Server {
         let response = self
             .client
             .post(format!(
-                "https://{}/start?rcs=1&firstevents=1&m=0&randid={}",
+                "https://{}/start?caps=recaptcha2,t&firstevents=1&spid=&randid={}&lang=en&topics=[\"hors\"]",
                 omegle_url, random_id
             ))
             .send()
@@ -92,28 +92,56 @@ impl Chat {
     }
 
     pub async fn fetch_event(&mut self) -> ChatEvent {
-        let omegle_url = format!("{}.omegle.com", self.server.name);
-        let pair = ("id", self.client_id.clone());
+        let server = &mut self.server;
+        let omegle_url = format!("{}.omegle.com", server.name);
+        let pair = [("id", self.client_id.clone())];
 
-        let response = self
-            .server
+        let response = server
             .client
             .post(format!("https://{}/events", omegle_url))
             .form(&pair)
             .send()
             .await;
 
-        println!("{:?}", response);
-
         if let Ok(response) = response {
-            if let Ok(body) = response.text().await {
-                if let Ok(json) = json::parse(body.as_str()) {
-                    println!("{}", json)
+            let json: Result<Vec<Vec<String>>, _> = response.json().await;
+
+            return match &json {
+                Ok(result) => {
+                    let message = &result[0];
+                    let event = &message[0];
+
+                    return match event.as_str() {
+                        "gotMessage" => ChatEvent::Message(message[1..message.len()].concat()),
+                        "typing" => ChatEvent::Typing,
+                        "strangerDisconnected" => ChatEvent::Disconnected,
+                        _ => ChatEvent::None,
+                    };
                 }
-            }
+                Err(_err) => ChatEvent::None,
+            };
         }
 
         return ChatEvent::None;
+    }
+
+    pub async fn send_message(&mut self, message: &str) {
+        let server = &mut self.server;
+        let omegle_url = format!("{}.omegle.com", server.name);
+
+        let pair = [("id", self.client_id.clone()), ("msg", message.to_owned())];
+
+        let response = server
+            .client
+            .post(format!("https://{}/send", omegle_url))
+            .form(&pair)
+            .send()
+            .await;
+
+        match response {
+            Err(error) => println!("{:?}", error),
+            _ => (),
+        }
     }
 }
 
