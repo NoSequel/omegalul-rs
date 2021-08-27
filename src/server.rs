@@ -1,6 +1,6 @@
 use crate::id::*;
-use reqwest::Client;
 use json::JsonValue;
+use reqwest::Client;
 
 use rand::seq::SliceRandom;
 
@@ -92,6 +92,7 @@ impl Server {
     }
 }
 
+#[derive(Clone)]
 pub struct Chat {
     client_id: String,
     server: Server,
@@ -139,8 +140,8 @@ impl Chat {
         return ChatEvent::None;
     }
 
-    pub async fn send_message(&mut self, message: &str) {
-        let server = &mut self.server;
+    pub async fn send_message(self, message: &str) {
+        let server = self.server;
         let omegle_url = format!("{}.omegle.com", server.name);
 
         let pair = [("id", self.client_id.clone()), ("msg", message.to_owned())];
@@ -148,6 +149,25 @@ impl Chat {
         let response = server
             .client
             .post(format!("https://{}/send", omegle_url))
+            .form(&pair)
+            .send()
+            .await;
+
+        match response {
+            Err(error) => println!("{:?}", error),
+            _ => (),
+        }
+    }
+
+    pub async fn disconnect(&mut self) {
+        let server = &mut self.server;
+        let omegle_url = format!("{}.omegle.com", server.name);
+
+        let pair = [("id", self.client_id.clone())];
+
+        let response = server
+            .client
+            .post(format!("https://{}/disconnect", omegle_url))
             .form(&pair)
             .send()
             .await;

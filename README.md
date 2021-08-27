@@ -11,7 +11,9 @@
 * Sending chat messages
 * Adding interests
 
-# Usages
+# Example usage
+>> These is just a simple example usage, to find more example usages, visit the ``/examples`` directory. 
+
 ```rs
     #[tokio::main]
     async fn main() {
