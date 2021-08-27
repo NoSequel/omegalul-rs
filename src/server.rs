@@ -197,19 +197,12 @@ fn as_array(value: &JsonValue) -> Vec<JsonValue> {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ChatEvent {
-    #[serde(rename(deserialize = "gotMessage"))]
     Message(String),
-    #[serde(rename(deserialize = "commonLikes"))]
     CommonLikes(Vec<String>),
-    #[serde(rename(deserialize = "connected"))]
     Connected,
-    #[serde(rename(deserialize = "strangerDisconnected"))]
     StrangerDisconnected,
-    #[serde(rename(deserialize = "typng"))]
     Typing,
-    #[serde(rename(deserialize = "stoppedTyping"))]
     StoppedTyping,
-    #[serde(rename(deserialize = "waiting"))]
     Waiting,
     None,
 }
