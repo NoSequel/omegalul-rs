@@ -9,15 +9,11 @@ pub async fn get_random_server() -> Option<String> {
     let servers = get_servers().await;
 
     if let Some(servers) = servers {
-        match servers {
-            JsonValue::Array(array) => {
-                let random = array.choose(&mut rand::thread_rng());
-
-                if let Some(random) = random {
-                    return Some(random.as_str().unwrap().to_string());
-                }
-            }
-            _ => {}
+        if let JsonValue::Array(array) = servers {
+            return match array.choose(&mut rand::thread_rng()) {
+                Some(random) => Some(random.as_str().unwrap().to_string()),
+                None => None,
+            };
         }
     }
 
@@ -28,13 +24,12 @@ pub async fn get_servers() -> Option<JsonValue> {
     let client = Client::new();
     let request = client.get("https://omegle.com/status").send().await;
 
-    if let Ok(request) = request {
-        return Some(
-            json::parse(request.text().await.unwrap().as_str()).unwrap()["servers"].clone(),
-        );
-    }
-
-    return None;
+    return match request {
+        Ok(request) => {
+            Some(json::parse(request.text().await.unwrap().as_str()).unwrap()["servers"].clone())
+        }
+        Err(_error) => None,
+    };
 }
 
 #[derive(Clone)]
@@ -79,14 +74,13 @@ impl Server {
             .await;
 
         if let Ok(response) = response {
-            let json_response = json::parse(&response.text().await.unwrap());
-
-            if let Ok(json) = json_response {
-                return Some(Chat::new(
+            return match json::parse(&response.text().await.unwrap()) {
+                Ok(json) => Some(Chat::new(
                     json["clientID"].clone().as_str().unwrap(),
                     self.clone(),
-                ));
-            }
+                )),
+                Err(_error) => None,
+            };
         }
 
         return None;

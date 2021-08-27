@@ -13,7 +13,7 @@ async fn main() {
             server_name.as_str(),
             vec!["discord".to_string(), "femboy".to_string()],
         );
-        
+
         let chat = &mut server.start_chat().await;
 
         if let Some(chat) = chat {
