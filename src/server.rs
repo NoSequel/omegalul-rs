@@ -56,7 +56,13 @@ impl Server {
     pub async fn start_chat(&mut self) -> Option<Chat> {
         let random_id = generate_random_id();
         let omegle_url = format!("{}.omegle.com", self.name);
-        let interests = self.interests.iter().cloned().intersperse(",".to_owned()).collect::<String>();
+        
+        let interests = self
+            .interests
+            .iter()
+            .cloned()
+            .intersperse(",".to_owned())
+            .collect::<String>();
 
         println!("{}", interests);
 
