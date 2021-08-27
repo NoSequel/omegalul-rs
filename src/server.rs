@@ -3,6 +3,7 @@ use json::JsonValue;
 use reqwest::Client;
 
 use rand::seq::SliceRandom;
+use serde::Serialize;
 
 pub async fn get_random_server() -> Option<String> {
     let servers = get_servers().await;
@@ -146,17 +147,12 @@ impl Chat {
 
         let pair = [("id", self.client_id.clone()), ("msg", message.to_owned())];
 
-        let response = server
-            .client
-            .post(format!("https://{}/send", omegle_url))
-            .form(&pair)
-            .send()
-            .await;
-
-        match response {
-            Err(error) => println!("{:?}", error),
-            _ => (),
-        }
+        handle_simple_post::<&str, String>(
+            server.client.clone(),
+            &format!("https://{}.omegle.com/send", omegle_url),
+            &pair,
+        )
+        .await;
     }
 
     pub async fn disconnect(&mut self) {
@@ -165,17 +161,24 @@ impl Chat {
 
         let pair = [("id", self.client_id.clone())];
 
-        let response = server
-            .client
-            .post(format!("https://{}/disconnect", omegle_url))
-            .form(&pair)
-            .send()
-            .await;
+        handle_simple_post::<&str, String>(
+            server.client.clone(),
+            &format!("https://{}.omegle.com/disconnect", omegle_url),
+            &pair,
+        )
+        .await;
+    }
+}
 
-        match response {
-            Err(error) => println!("{:?}", error),
-            _ => (),
-        }
+async fn handle_simple_post<K: Serialize, V: Serialize>(
+    client: Client,
+    url: &str,
+    pair: &[(K, V)],
+) {
+    let response = client.post(format!("{}", &url)).form(&pair).send().await;
+
+    if let Err(error) = response {
+        println!("{:?}", error);
     }
 }
 
