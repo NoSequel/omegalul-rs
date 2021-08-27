@@ -1,4 +1,4 @@
-<img src="https://www.code-inspector.com/project/26946/score/svg"> <img src="https://www.code-inspector.com/project/26946/status/svg">
+![crates.io](https://img.shields.io/crates/v/$CRATE.svg) <img src="https://www.code-inspector.com/project/26946/score/svg"> <img src="https://www.code-inspector.com/project/26946/status/svg">
 
 # omegalul-rs
 ``omegalul-rs`` is a work-in-progress opensource library for building [Omegle](https://omegle.com) clients. 
@@ -12,7 +12,8 @@
 * Adding interests
 
 # Example usage
->> These is just a simple example usage, to find more example usages, visit the ``/examples`` directory. 
+> These is just a simple example usage, to find more example usages, visit the ``/examples`` directory. 
+> For more documentation, check out the [documentation](https://docs.rs/omegalul/0.1.0/omegalul/)
 
 ```rs
     #[tokio::main]
