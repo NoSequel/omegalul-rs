@@ -12,7 +12,7 @@ mod tests {
         if let Some(server_name) = get_random_server().await {
             println!("Connecting to {} server", server_name);
 
-            let server = &mut Server::new(server_name.as_str());
+            let server = &mut Server::new(server_name.as_str(), vec!["hors".to_string(), "discord".to_string()]);
             let chat = &mut server.start_chat().await;
 
             if let Some(chat) = chat {

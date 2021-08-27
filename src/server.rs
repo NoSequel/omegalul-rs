@@ -1,4 +1,5 @@
 use crate::id::*;
+use itertools::Itertools;
 use json::JsonValue;
 use reqwest::Client;
 
@@ -39,13 +40,15 @@ pub async fn get_servers() -> Option<JsonValue> {
 #[derive(Clone)]
 pub struct Server {
     name: String,
+    interests: Vec<String>,
     client: Client,
 }
 
 impl Server {
-    pub fn new(name: &str) -> Self {
+    pub fn new(name: &str, interests: Vec<String>) -> Self {
         Self {
             name: name.to_string(),
+            interests: interests,
             client: Client::new(),
         }
     }
@@ -53,12 +56,15 @@ impl Server {
     pub async fn start_chat(&mut self) -> Option<Chat> {
         let random_id = generate_random_id();
         let omegle_url = format!("{}.omegle.com", self.name);
+        let interests = self.interests.iter().cloned().intersperse(",".to_owned()).collect::<String>();
+
+        println!("{}", interests);
 
         let response = self
             .client
             .post(format!(
-                "https://{}/start?caps=recaptcha2,t&firstevents=1&spid=&randid={}&lang=en&topics=[\"hors\"]",
-                omegle_url, random_id
+                "https://{}/start?caps=recaptcha2,t&firstevents=1&spid=&randid={}&lang=en&topics=[{}]",
+                omegle_url, random_id, interests
             ))
             .send()
             .await;

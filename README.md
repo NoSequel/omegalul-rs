@@ -5,9 +5,7 @@
 ### Current Features
 * Fetching random server from omegle status servers
 * Starting a chat on the server
-* Fetching current chat event (currently not working properly)
-
-### Missing Features (adding soon)
+* Fetching current chat event 
 * Sending chat messages
 * Adding interests
 
@@ -23,7 +21,7 @@
             // just create a new server - this is a simple struct and 
             // the Server::new(&str) method does nothing besides creating
             // a new object of the struct.
-            let server = &mut Server::new(server_name.as_str());
+            let server = &mut Server::new(server_name.as_str(), vec!["hors".to_string(), "discord".to_string()]);
 
             // start the chat, this sends a POST message  
             // and connects to the current omegle server

@@ -10,6 +10,7 @@ authors = ["NV6", "pcrunn"]
 reqwest = { version = "0.11.4", features = ["json"] }
 json = "0.12.4"
 rand = "0.8.4"
+itertools = "0.10.1"
 
 serde = { version = "1.0", features = ["derive"] }
 tokio = { version = "1.10.0", features = ["full"] }
