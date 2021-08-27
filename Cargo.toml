@@ -2,7 +2,9 @@
 name = "omegalul"
 version = "0.1.0"
 edition = "2018"
-authors = ["NV6", "pcrunn"]
+description = "A simple library for building Omegle clients"
+license = "MIT"
+authors = ["NV6"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
