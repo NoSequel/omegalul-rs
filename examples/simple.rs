@@ -28,7 +28,9 @@ async fn main() {
 
                 runtime.block_on(async {
                     loop {
-                        let commands: HashMap<&str, Box<_>> = [(
+                        let commands = &mut HashMap::<&str, Box<dyn Fn()>>::new();
+
+                        commands.insert(
                             "disconnect",
                             Box::new(|| {
                                 let cloned_chat = cloned_chat.clone();
@@ -40,10 +42,12 @@ async fn main() {
                                     std::process::exit(0);
                                 });
                             }),
-                        )]
-                        .iter()
-                        .cloned()
-                        .collect();
+                        );
+
+                        commands.insert(
+                            "info",
+                            Box::new(|| println!("client id: {}", cloned_chat.client_id)),
+                        );
 
                         let input = &get_input();
                         let command = commands.get(input.as_str());
