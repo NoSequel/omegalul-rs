@@ -1,5 +1,5 @@
 use rand::{prelude::Distribution, Rng};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 pub fn generate_random_id() -> String {
     let rng = &mut rand::thread_rng();

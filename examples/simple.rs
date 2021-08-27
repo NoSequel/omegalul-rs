@@ -1,5 +1,5 @@
 extern crate omegalul;
-use std::thread;
+use std::{collections::HashMap, thread};
 
 use ::std::*;
 use omegalul::server::{get_random_server, ChatEvent, Server};
@@ -28,14 +28,29 @@ async fn main() {
 
                 runtime.block_on(async {
                     loop {
-                        let input = &get_input();
+                        let commands: HashMap<&str, Box<_>> = [(
+                            "disconnect",
+                            Box::new(|| {
+                                let cloned_chat = cloned_chat.clone();
 
-                        match input.as_str() {
-                            "disconnect" => {
-                                cloned_chat.clone().disconnect().await;
-                                println!("Disconnected you from the chat, re-open program to start new chat.");
-                            },
-                            _ => cloned_chat.clone().send_message(input).await,
+                                runtime.spawn(async move {
+                                    cloned_chat.clone().disconnect().await;
+
+                                    println!("Disconnected, quitting program.");
+                                    std::process::exit(0);
+                                });
+                            }),
+                        )]
+                        .iter()
+                        .cloned()
+                        .collect();
+
+                        let input = &get_input();
+                        let command = commands.get(input.as_str());
+
+                        match command {
+                            Some(function) => (function)(),
+                            None => cloned_chat.clone().send_message(input).await,
                         }
                     }
                 });
