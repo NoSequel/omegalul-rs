@@ -1,4 +1,5 @@
-<a href="https://www.code-inspector.com/project/26946/score/svg"> <a href="https://www.code-inspector.com/project/26946/status/svg">
+<img src="https://www.code-inspector.com/project/26946/score/svg"> <img src="https://www.code-inspector.com/project/26946/status/svg">
+
 # omegalul-rs
 ``omegalul-rs`` is a work-in-progress opensource library for building [Omegle](https://omegle.com) clients. 
 
