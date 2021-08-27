@@ -14,7 +14,7 @@ mod tests {
 
             let server = &mut Server::new(
                 server_name.as_str(),
-                vec!["hors".to_string(), "discord".to_string()],
+                vec!["hors".to_string()],
             );
             let chat = &mut server.start_chat().await;
 

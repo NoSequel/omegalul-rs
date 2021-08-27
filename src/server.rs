@@ -1,7 +1,6 @@
 use crate::id::*;
-use itertools::Itertools;
-use json::JsonValue;
 use reqwest::Client;
+use json::JsonValue;
 
 use rand::seq::SliceRandom;
 
@@ -56,21 +55,24 @@ impl Server {
     pub async fn start_chat(&mut self) -> Option<Chat> {
         let random_id = generate_random_id();
         let omegle_url = format!("{}.omegle.com", self.name);
-        
-        let interests = self
-            .interests
-            .iter()
-            .cloned()
-            .intersperse(",".to_owned())
-            .collect::<String>();
 
-        println!("{}", interests);
+        let mut interests_str = "".to_owned();
+
+        for i in 0..self.interests.len() {
+            interests_str.push_str(&format!("\"{}\"", self.interests[i]));
+
+            if i != self.interests.len() - 1 {
+                interests_str.push(',');
+            }
+        }
+
+        println!("{}", interests_str);
 
         let response = self
             .client
             .post(format!(
                 "https://{}/start?caps=recaptcha2,t&firstevents=1&spid=&randid={}&lang=en&topics=[{}]",
-                omegle_url, random_id, interests
+                omegle_url, random_id, interests_str
             ))
             .send()
             .await;
