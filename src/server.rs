@@ -124,15 +124,25 @@ impl Chat {
 
             return match &json {
                 Ok(result) => {
-                    let message = &result[0];
-                    let event = &message[0];
+                    if result.len() >= 1 {
+                        let message = &result[0];
+                        let event = &message[0];
 
-                    return match event.as_str() {
-                        "gotMessage" => ChatEvent::Message(message[1..message.len()].concat()),
-                        "typing" => ChatEvent::Typing,
-                        "strangerDisconnected" => ChatEvent::Disconnected,
-                        _ => ChatEvent::None,
-                    };
+                        return match event.as_str() {
+                            "gotMessage" => ChatEvent::Message(message[1..message.len()].concat()),
+                            "commonLikes" => {
+                                ChatEvent::CommonLikes(message[1..message.len()].concat())
+                            }
+                            "typing" => ChatEvent::Typing,
+                            "stoppedTyping" => ChatEvent::StoppedTyping,
+                            "strangerDisconnected" => ChatEvent::Disconnected,
+                            "connected" => ChatEvent::Connected,
+                            "waiting" => ChatEvent::Waiting,
+                            _ => ChatEvent::None,
+                        };
+                    }
+
+                    return ChatEvent::None;
                 }
                 Err(_err) => ChatEvent::None,
             };
@@ -149,7 +159,7 @@ impl Chat {
 
         handle_simple_post::<&str, String>(
             server.client.clone(),
-            &format!("https://{}.omegle.com/send", omegle_url),
+            &format!("https://{}/send", omegle_url),
             &pair,
         )
         .await;
@@ -163,7 +173,7 @@ impl Chat {
 
         handle_simple_post::<&str, String>(
             server.client.clone(),
-            &format!("https://{}.omegle.com/disconnect", omegle_url),
+            &format!("https://{}/disconnect", omegle_url),
             &pair,
         )
         .await;
@@ -175,7 +185,7 @@ async fn handle_simple_post<K: Serialize, V: Serialize>(
     url: &str,
     pair: &[(K, V)],
 ) {
-    let response = client.post(format!("{}", &url)).form(&pair).send().await;
+    let response = client.post(format!("{}", url)).form(&pair).send().await;
 
     if let Err(error) = response {
         println!("{:?}", error);
@@ -185,7 +195,11 @@ async fn handle_simple_post<K: Serialize, V: Serialize>(
 #[derive(Debug)]
 pub enum ChatEvent {
     Message(String),
+    CommonLikes(String),
+    Connected,
     Disconnected,
     Typing,
+    StoppedTyping,
+    Waiting,
     None,
 }
