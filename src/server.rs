@@ -62,8 +62,6 @@ impl Server {
             }
         }
 
-        println!("{}", interests_str);
-
         let response = self
             .client
             .post(format!(
