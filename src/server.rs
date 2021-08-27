@@ -3,7 +3,7 @@ use json::JsonValue;
 use reqwest::Client;
 
 use rand::seq::SliceRandom;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 pub async fn get_random_server() -> Option<String> {
     let servers = get_servers().await;
@@ -112,32 +112,36 @@ impl Chat {
             .await;
 
         if let Ok(response) = response {
-            let json: Result<Vec<Vec<String>>, _> = response.json().await;
+            let response_text = response.text().await;
 
-            return match &json {
-                Ok(result) => {
-                    if result.len() >= 1 {
-                        let message = &result[0];
-                        let event = &message[0];
+            if let Ok(response_text) = response_text {
+                let json_response = json::parse(&response_text);
 
-                        return match event.as_str() {
-                            "gotMessage" => ChatEvent::Message(message[1..message.len()].concat()),
-                            "commonLikes" => {
-                                ChatEvent::CommonLikes(message[1..message.len()].concat())
-                            }
-                            "typing" => ChatEvent::Typing,
-                            "stoppedTyping" => ChatEvent::StoppedTyping,
-                            "strangerDisconnected" => ChatEvent::Disconnected,
-                            "connected" => ChatEvent::Connected,
-                            "waiting" => ChatEvent::Waiting,
-                            _ => ChatEvent::None,
-                        };
-                    }
+                return match json_response {
+                    Ok(json_response) => {
+                        let response_array = as_array(&json_response);
 
-                    return ChatEvent::None;
-                }
-                Err(_err) => ChatEvent::None,
-            };
+                        for event in response_array {
+                            let array = as_array(&event);
+                            let event_name = event[0].as_str().unwrap().to_owned();
+
+                            return match event_name.as_str() {
+                                "gotMessage" => ChatEvent::Message(array[1].as_str().unwrap().to_owned()),
+                                "connected" => ChatEvent::Connected,
+                                "commonLikes" => ChatEvent::CommonLikes(as_array(&array[1]).iter().map(|x| x.as_str().unwrap().to_owned()).collect()),
+                                "waiting" => ChatEvent::Waiting,
+                                "typing" => ChatEvent::Typing,
+                                "stoppedTyping" => ChatEvent::StoppedTyping,
+                                "strangerDisconnected" => ChatEvent::StrangerDisconnected,
+                                _ => ChatEvent::None
+                            };
+                        }
+                        
+                        return ChatEvent::None;
+                    },
+                    Err(_err) => ChatEvent::None
+                };
+            }
         }
 
         return ChatEvent::None;
@@ -184,14 +188,28 @@ async fn handle_simple_post<K: Serialize, V: Serialize>(
     }
 }
 
-#[derive(Debug)]
+fn as_array(value: &JsonValue) -> Vec<JsonValue> {
+    match value {
+        JsonValue::Array(array) => array.to_vec(),
+        _ => vec![],
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum ChatEvent {
+    #[serde(rename(deserialize = "gotMessage"))]
     Message(String),
-    CommonLikes(String),
+    #[serde(rename(deserialize = "commonLikes"))]
+    CommonLikes(Vec<String>),
+    #[serde(rename(deserialize = "connected"))]
     Connected,
-    Disconnected,
+    #[serde(rename(deserialize = "strangerDisconnected"))]
+    StrangerDisconnected,
+    #[serde(rename(deserialize = "typng"))]
     Typing,
+    #[serde(rename(deserialize = "stoppedTyping"))]
     StoppedTyping,
+    #[serde(rename(deserialize = "waiting"))]
     Waiting,
     None,
 }

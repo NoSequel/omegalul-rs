@@ -11,7 +11,7 @@ async fn main() {
 
         let server = &mut Server::new(
             server_name.as_str(),
-            vec!["discord".to_string(), "femboy".to_string()],
+            vec!["hors".to_string()],
         );
 
         let chat = &mut server.start_chat().await;
@@ -65,11 +65,13 @@ async fn main() {
 
                 match event {
                     ChatEvent::Message(message) => println!("Incoming... \"{}\"", &message),
-                    ChatEvent::Disconnected => println!("The user has disconnected... mean."),
+                    ChatEvent::StrangerDisconnected => {
+                        println!("The user has disconnected... mean.")
+                    }
                     ChatEvent::Typing => println!("The user is typing... how exciting!"),
                     ChatEvent::Connected => println!("You have matched with someone!"),
                     ChatEvent::CommonLikes(likes) => {
-                        println!("Oh, you 2 seem to have some things in common! {}", likes)
+                        println!("Oh, you 2 seem to have some things in common! {:?}", likes)
                     }
                     ChatEvent::Waiting => {
                         println!("You are currently waiting for a person to match with.")
