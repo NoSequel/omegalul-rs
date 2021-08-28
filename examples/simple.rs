@@ -9,11 +9,7 @@ async fn main() {
     if let Some(server_name) = get_random_server().await {
         println!("Connecting to {} server", server_name);
 
-        let server = &mut Server::new(
-            server_name.as_str(),
-            vec!["hors".to_string()],
-        );
-
+        let server = &mut Server::new(server_name.as_str(), vec!["minecraft".to_string()]);
         let chat = &mut server.start_chat().await;
 
         if let Some(chat) = chat {
@@ -54,7 +50,10 @@ async fn main() {
 
                         match command {
                             Some(function) => (function)(),
-                            None => cloned_chat.clone().send_message(input).await,
+                            None => {
+                                println!("You: {}", input);
+                                cloned_chat.clone().send_message(input).await
+                            }
                         }
                     }
                 });
@@ -64,12 +63,12 @@ async fn main() {
                 let event = chat.fetch_event().await;
 
                 match event {
-                    ChatEvent::Message(message) => println!("Incoming... \"{}\"", &message),
+                    ChatEvent::Message(message) => println!("Stranger: {}", &message),
                     ChatEvent::StrangerDisconnected => {
-                        println!("The user has disconnected... mean.")
+                        println!("The user has disconnected.")
                     }
-                    ChatEvent::Typing => println!("The user is typing... how exciting!"),
-                    ChatEvent::Connected => println!("You have matched with someone!"),
+                    ChatEvent::Typing => println!("Stranger is typing..."),
+                    ChatEvent::Connected => println!("You have matched with someone."),
                     ChatEvent::CommonLikes(likes) => {
                         println!("Oh, you 2 seem to have some things in common! {:?}", likes)
                     }

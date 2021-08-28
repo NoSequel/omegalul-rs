@@ -112,12 +112,8 @@ impl Chat {
             .await;
 
         if let Ok(response) = response {
-            let response_text = response.text().await;
-
-            if let Ok(response_text) = response_text {
-                let json_response = json::parse(&response_text);
-
-                return match json_response {
+            if let Ok(response_text) = response.text().await {
+                return match json::parse(&response_text) {
                     Ok(json_response) => {
                         let response_array = as_array(&json_response);
 
@@ -126,20 +122,27 @@ impl Chat {
                             let event_name = event[0].as_str().unwrap().to_owned();
 
                             return match event_name.as_str() {
-                                "gotMessage" => ChatEvent::Message(array[1].as_str().unwrap().to_owned()),
+                                "gotMessage" => {
+                                    ChatEvent::Message(array[1].as_str().unwrap().to_owned())
+                                }
                                 "connected" => ChatEvent::Connected,
-                                "commonLikes" => ChatEvent::CommonLikes(as_array(&array[1]).iter().map(|x| x.as_str().unwrap().to_owned()).collect()),
+                                "commonLikes" => ChatEvent::CommonLikes(
+                                    as_array(&array[1])
+                                        .iter()
+                                        .map(|x| x.as_str().unwrap().to_owned())
+                                        .collect(),
+                                ),
                                 "waiting" => ChatEvent::Waiting,
                                 "typing" => ChatEvent::Typing,
                                 "stoppedTyping" => ChatEvent::StoppedTyping,
                                 "strangerDisconnected" => ChatEvent::StrangerDisconnected,
-                                _ => ChatEvent::None
+                                _ => ChatEvent::None,
                             };
                         }
-                        
+
                         return ChatEvent::None;
-                    },
-                    Err(_err) => ChatEvent::None
+                    }
+                    Err(_err) => ChatEvent::None,
                 };
             }
         }
@@ -147,30 +150,41 @@ impl Chat {
         return ChatEvent::None;
     }
 
-    pub async fn send_message(self, message: &str) {
-        let server = self.server;
-        let omegle_url = format!("{}.omegle.com", server.name);
-
-        let pair = [("id", self.client_id.clone()), ("msg", message.to_owned())];
-
-        handle_simple_post::<&str, String>(
-            server.client.clone(),
-            &format!("https://{}/send", omegle_url),
-            &pair,
+    pub async fn send_message(&mut self, message: &str) {
+        self.handle_server_post(
+            "send",
+            &[("id", self.client_id.clone()), ("msg", message.to_owned())],
         )
         .await;
     }
 
     pub async fn disconnect(&mut self) {
+        self.handle_server_post("disconnect", &[("id", self.client_id.clone())])
+            .await;
+    }
+
+    pub async fn start_typing(&mut self) {
+        self.handle_server_post("typing", &[("id", self.client_id.clone())])
+            .await;
+    }
+
+    pub async fn stop_typing(&mut self) {
+        self.handle_server_post("stoppedtyping", &[("id", self.client_id.clone())])
+            .await;
+    }
+
+    pub async fn handle_server_post<K: Serialize, V: Serialize>(
+        &mut self,
+        path: &str,
+        pair: &[(K, V)],
+    ) {
         let server = &mut self.server;
         let omegle_url = format!("{}.omegle.com", server.name);
 
-        let pair = [("id", self.client_id.clone())];
-
-        handle_simple_post::<&str, String>(
+        handle_simple_post(
             server.client.clone(),
-            &format!("https://{}/disconnect", omegle_url),
-            &pair,
+            &format!("https://{}/{}", omegle_url, path),
+            pair,
         )
         .await;
     }

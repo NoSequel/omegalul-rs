@@ -2,14 +2,11 @@ use rand::{prelude::Distribution, Rng};
 use serde::{Deserialize, Serialize};
 
 pub fn generate_random_id() -> String {
-    let rng = &mut rand::thread_rng();
-    let result: String = rng
+    return rand::thread_rng()
         .sample_iter(Omeglenumeric)
         .take(8)
         .map(char::from)
         .collect();
-
-    return result;
 }
 
 // implementation was straight up copied from Alphanumeric implementation,
